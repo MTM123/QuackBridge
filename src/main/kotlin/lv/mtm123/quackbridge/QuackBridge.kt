@@ -56,11 +56,11 @@ class QuackBridge {
         commandManager.register("online", CommandOnline(this, game))
         commandManager.register("cmd", CommandCmd(this, config.entitiesAllowedToExecuteCmds))
 
-        this.jda = JDABuilder.createDefault(config.botToken).addEventListeners(GuildListener(commandManager)).build()
+        this.jda = JDABuilder.createDefault(config.botToken).addEventListeners(GuildListener(this, game?.server, commandManager)).build()
 
         val discordWebhookHandler = DiscordWebhookHandler(logger, config.avatarApiUrl)
 
-        Sponge.getEventManager().registerListeners(this, lv.mtm123.quackbridge.Listener(jda, discordWebhookHandler, config))
+        Sponge.getEventManager().registerListeners(this, Listener(jda, discordWebhookHandler, config))
     }
 
 }

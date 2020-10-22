@@ -8,7 +8,7 @@ import org.spongepowered.api.Server
 import org.spongepowered.api.scheduler.Task
 import org.spongepowered.api.text.Text
 
-class GuildListener(private val plugin: QuackBridge, private val server: Server, val commandManager: CommandManager) : ListenerAdapter() {
+class GuildListener(private val plugin: QuackBridge, private val server: Server?, private val commandManager: CommandManager) : ListenerAdapter() {
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
         val msg = event.message.contentRaw
@@ -16,7 +16,7 @@ class GuildListener(private val plugin: QuackBridge, private val server: Server,
             event.member?.let { commandManager.handleCommand(it, event.channel, event.message) }
         } else {
             Task.builder().execute(Runnable {
-                server.broadcastChannel.send(Text.of(msg))
+                server?.broadcastChannel?.send(Text.of(msg))
             }).submit(plugin)
         }
     }

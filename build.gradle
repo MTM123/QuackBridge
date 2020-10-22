@@ -13,7 +13,6 @@ dependencies {
     compileOnly 'org.spongepowered:spongeapi:7.3.0'
     annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compile "io.ktor:ktor-server-core:$ktor_version"
     compile 'net.dv8tion:JDA:4.2.0_209'
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
 }
