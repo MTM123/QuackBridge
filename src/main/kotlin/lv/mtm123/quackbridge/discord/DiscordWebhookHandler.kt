@@ -6,7 +6,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import org.slf4j.Logger
 import java.io.IOException
 
-class DiscordWebhookHandler(private val logger: Logger?, val webhookUrl: String) {
+class DiscordWebhookHandler(private val logger: Logger?, private val webhookUrl: String) {
 
     private val mediaType: MediaType = "application/json".toMediaType()
     private val gson: Gson = Gson()
@@ -22,13 +22,13 @@ class DiscordWebhookHandler(private val logger: Logger?, val webhookUrl: String)
                 .post(requestBody)
                 .build()
 
-        //Ion curr
         client.newCall(req).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 logger?.error("Failed to send message!", e)
             }
 
             override fun onResponse(call: Call, response: Response) {
+                response.close()
             }
         })
     }

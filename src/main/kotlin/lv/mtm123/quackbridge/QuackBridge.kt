@@ -55,7 +55,7 @@ class QuackBridge {
         val options = ConfigurationOptions.defaults().withSerializers(serializers)
 
         val default = Config()
-        if (!defaultConfigFile.exists()){
+        if (!defaultConfigFile.exists()) {
             try {
                 this.configManager.save(this.configManager.createEmptyNode(options).setValue(typeToken, default))
             } catch (e: IOException) {
@@ -75,9 +75,11 @@ class QuackBridge {
         commandManager.register("online", CommandOnline(this, game))
         commandManager.register("cmd", CommandCmd(this, config.entitiesAllowedToExecuteCmds))
 
-        this.jda = JDABuilder.createDefault(config.botToken).addEventListeners(GuildListener(this, game?.server, commandManager)).build()
+        this.jda = JDABuilder.createDefault(config.botToken)
+                .addEventListeners(GuildListener(this, game?.server, this.config, commandManager))
+                .build()
 
-        val discordWebhookHandler = DiscordWebhookHandler(logger, config.avatarApiUrl)
+        val discordWebhookHandler = DiscordWebhookHandler(logger, config.discordWebhookUrl)
 
         Sponge.getEventManager().registerListeners(this, Listener(jda, discordWebhookHandler, config))
     }

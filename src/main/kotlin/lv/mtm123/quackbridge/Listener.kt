@@ -17,9 +17,9 @@ import org.spongepowered.api.event.network.ClientConnectionEvent
 class Listener(private val jda: JDA, private val webhookHandler: DiscordWebhookHandler, private val config: Config) {
 
     @Listener(order = Order.POST)
-    fun onChat(event: MessageChannelEvent, @First player: Player) {
+    fun onChat(event: MessageChannelEvent.Chat, @First player: Player) {
         val msg = MessageRequest("${config.avatarApiUrl}/${player.uniqueId}",
-                event.message.toPlain(), player.name)
+                event.rawMessage.toPlain(), player.name)
         webhookHandler.postMessage(msg)
     }
 
@@ -43,7 +43,7 @@ class Listener(private val jda: JDA, private val webhookHandler: DiscordWebhookH
         val msg = event.message.toPlain()
         if (msg.isEmpty()) return
 
-        jda.getTextChannelById(config.chatChannel)?.sendMessage(msg)?.queue()
+        jda.getTextChannelById(config.chatChannel)?.sendMessage("**:skull_crossbones: $msg**")?.queue()
     }
 
     @Listener(order = Order.POST)

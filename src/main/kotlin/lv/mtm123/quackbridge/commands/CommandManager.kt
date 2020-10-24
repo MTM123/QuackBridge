@@ -14,11 +14,12 @@ class CommandManager(private val prefix: String) {
 
     fun handleCommand(issuer: Member, channel: TextChannel, message: Message) {
         val commandComponents = message.contentRaw.split(" ")
-        if (!commands.containsKey(commandComponents[0])) {
+        val cmdLabel = commandComponents[0].substring(1)
+        if (!commands.containsKey(cmdLabel)) {
             return
         }
 
-        val cmd = commands[commandComponents[0]]
+        val cmd = commands[cmdLabel]
         val args = commandComponents.subList(1, commandComponents.size)
 
         cmd?.onExecute(channel, issuer, message, args)

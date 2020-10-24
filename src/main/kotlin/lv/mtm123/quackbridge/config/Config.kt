@@ -18,6 +18,12 @@ class Config {
     @Setting("avatar-api-url")
     val avatarApiUrl: String = "https://mc-heads.net/avatar"
 
+    @Setting("discord-webhook-url")
+    val discordWebhookUrl: String =  "https://example.com"
+
+    @Setting("discord-chat-message-format")
+    val discordChatMessageFormat: String = "&6[Discord] &a%user%: &7%text%"
+
     @Setting("entities-allowed-to-execute-cmds")
     val entitiesAllowedToExecuteCmds: List<Entity> = listOf(Entity(Entity.EntityType.ROLE, 751497992149663856),
             Entity(Entity.EntityType.USER, 179983857267769344))
