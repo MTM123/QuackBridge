@@ -23,6 +23,8 @@ import org.spongepowered.api.config.DefaultConfig
 import org.spongepowered.api.event.Listener
 import org.spongepowered.api.event.game.state.GameStartedServerEvent
 import org.spongepowered.api.plugin.Plugin
+import java.io.File
+import java.io.IOException
 
 @Plugin(id = "quackbridge", name = "QuackBridge", description = "Bridges discord chat and minecraft chat", url = "https://mtm123.lv", authors = ["MTM123"])
 class QuackBridge {
@@ -35,6 +37,10 @@ class QuackBridge {
     private lateinit var configManager: ConfigurationLoader<CommentedConfigurationNode>
 
     @Inject
+    @DefaultConfig(sharedRoot = false)
+    private lateinit var defaultConfigFile: File
+
+    @Inject
     private val game: Game? = null
 
     private lateinit var config: Config
@@ -42,11 +48,24 @@ class QuackBridge {
 
     @Listener
     fun onServerStart(event: GameStartedServerEvent?) {
+
+        val typeToken = TypeToken.of(Config::class.java)
+        val serializers = TypeSerializerCollection.defaults().newChild()
+        serializers.register(TypeToken.of(Entity::class.java), EntitySerializer())
+        val options = ConfigurationOptions.defaults().withSerializers(serializers)
+
+        val default = Config()
+        if (!defaultConfigFile.exists()){
+            try {
+                this.configManager.save(this.configManager.createEmptyNode(options).setValue(typeToken, default))
+            } catch (e: IOException) {
+                this.logger?.error("Failed to save the config", e)
+                return
+            }
+        }
+
         try {
-            val serializers = TypeSerializerCollection.defaults().newChild()
-            serializers.register(TypeToken.of(Entity::class.java), EntitySerializer())
-            val options = ConfigurationOptions.defaults().withSerializers(serializers)
-            this.config = this.configManager.load(options).getValue(TypeToken.of(Config::class.java), Config())
+            this.config = this.configManager.load(options).getValue(typeToken, default)
         } catch (e: Exception) {
             this.logger?.error("Failed to load the config - using default", e)
             return
