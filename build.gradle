@@ -11,12 +11,14 @@ sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 shadowJar {
+    minimize()
     relocate 'okhttp3', 'lv.mtm123.quackbridge.okhttp3'
     relocate 'org.jetbrains.kotlin', 'lv.mtm123.quackbridge.org.jetbrains.kotlin'
     relocate 'net.dv8tion', 'lv.mtm123.quackbridge.net.dv8tion'
     relocate 'com.fasterxml.jackson', 'lv.mtm123.quackbridge.com.fasterxml.jackson'
     exclude("**/module-info.class")
 }
+build.dependsOn shadowJar
 
 dependencies {
     compileOnly 'org.spongepowered:spongeapi:7.3.0'
