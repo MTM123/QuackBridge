@@ -22,6 +22,7 @@ import org.spongepowered.api.Sponge
 import org.spongepowered.api.config.DefaultConfig
 import org.spongepowered.api.event.Listener
 import org.spongepowered.api.event.game.state.GameStartedServerEvent
+import org.spongepowered.api.event.game.state.GameStoppedServerEvent
 import org.spongepowered.api.plugin.Plugin
 import java.io.File
 import java.io.IOException
@@ -82,6 +83,11 @@ class QuackBridge {
         val discordWebhookHandler = DiscordWebhookHandler(logger, config.discordWebhookUrl)
 
         Sponge.getEventManager().registerListeners(this, Listener(jda, discordWebhookHandler, config))
+    }
+
+    @Listener
+    fun onServerStop(event: GameStoppedServerEvent) {
+        this.jda.getTextChannelById(config.chatChannel)?.sendMessage("** Server stopped **")?.queue()
     }
 
 }

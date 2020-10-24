@@ -3,6 +3,7 @@ package lv.mtm123.quackbridge.discord
 import lv.mtm123.quackbridge.QuackBridge
 import lv.mtm123.quackbridge.commands.CommandManager
 import lv.mtm123.quackbridge.config.Config
+import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.spongepowered.api.Server
@@ -29,6 +30,10 @@ class GuildListener(private val plugin: QuackBridge, private val server: Server?
                 server?.broadcastChannel?.send(TextSerializers.FORMATTING_CODE.deserialize(bridgedMsg))
             }).submit(plugin)
         }
+    }
+
+    override fun onReady(event: ReadyEvent) {
+        event.jda.getTextChannelById(config.chatChannel)?.sendMessage("** Server started **")?.queue()
     }
 
 }
