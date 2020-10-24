@@ -1,6 +1,7 @@
 plugins {
     id 'org.spongepowered.plugin' version '0.9.0'
     id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
 group = 'lv.mtm123'
@@ -9,11 +10,19 @@ version = '1.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
+shadowJar {
+    relocate 'okhttp3', 'lv.mtm123.quackbridge.okhttp3'
+    relocate 'org.jetbrains.kotlin', 'lv.mtm123.quackbridge.org.jetbrains.kotlin'
+    relocate 'net.dv8tion', 'lv.mtm123.quackbridge.net.dv8tion'
+    relocate 'com.fasterxml.jackson', 'lv.mtm123.quackbridge.com.fasterxml.jackson'
+    exclude("**/module-info.class")
+}
+
 dependencies {
     compileOnly 'org.spongepowered:spongeapi:7.3.0'
     annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compile 'net.dv8tion:JDA:4.2.0_209'
+    implementation "net.dv8tion:JDA:4.2.0_209"
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
 }
 
@@ -23,11 +32,6 @@ repositories {
     jcenter()
 }
 compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-compileTestKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
     }
