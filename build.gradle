@@ -16,7 +16,16 @@ shadowJar {
     relocate 'org.jetbrains.kotlin', 'lv.mtm123.quackbridge.org.jetbrains.kotlin'
     relocate 'net.dv8tion', 'lv.mtm123.quackbridge.net.dv8tion'
     relocate 'com.fasterxml.jackson', 'lv.mtm123.quackbridge.com.fasterxml.jackson'
-    exclude("**/module-info.class")
+    relocate 'kotlin', 'lv.mtm123.quackbridge.kotlin'
+    relocate 'org.apache.commons.collections4', 'lv.mtm123.quackbridge.org.apache.commons.collections4'
+    relocate 'com.neovisionaries', 'lv.mtm123.quackbridge.com.neovisionaries'
+    relocate 'gnu.trove', 'lv.mtm123.quackbridge.gnu.trove'
+    relocate 'okio', 'lv.mtm123.quackbridge.okio'
+    relocate 'com.iwebpp', 'lv.mtm123.quackbridge.com.iwebpp'
+    exclude 'org/slf4j/**'
+    exclude 'javax/annotation/**'
+    exclude 'org/jetbrains/**'
+    exclude '**/module-info.class'
 }
 build.dependsOn shadowJar
 
@@ -24,7 +33,9 @@ dependencies {
     compileOnly 'org.spongepowered:spongeapi:7.3.0'
     annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation "net.dv8tion:JDA:4.2.0_209"
+    implementation("net.dv8tion:JDA:4.2.0_209") {
+        exclude module: 'opus-java'
+    }
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
 }
 
