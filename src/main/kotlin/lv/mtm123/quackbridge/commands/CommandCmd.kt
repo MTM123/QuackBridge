@@ -2,38 +2,39 @@ package lv.mtm123.quackbridge.commands
 
 import lv.mtm123.quackbridge.QuackBridge
 import lv.mtm123.quackbridge.config.Entity
-import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.entities.TextChannel
+import org.javacord.api.entity.channel.TextChannel
+import org.javacord.api.entity.message.Message
+import org.javacord.api.entity.server.Server
+import org.javacord.api.entity.user.User
 import org.spongepowered.api.Sponge
 import org.spongepowered.api.scheduler.Task
 
 class CommandCmd(private val plugin: QuackBridge, private val entities: List<Entity>) : Command {
 
-    override fun onExecute(channel: TextChannel, issuer: Member, message: Message, args: List<String>) {
+    override fun onExecute(channel: TextChannel, issuer: User, message: Message, args: List<String>) {
 
-        if (!canExecuteCommand(issuer)) {
-            channel.sendMessage("** You don't have permission to use this command! **").queue()
+        if (!canExecuteCommand(message.server.get(), issuer)) {
+            channel.sendMessage("** You don't have permission to use this command! **")
             return
         }
 
         if (args.isEmpty()) {
-            channel.sendMessage("** You need to specify a command to execute! **").queue()
+            channel.sendMessage("** You need to specify a command to execute! **")
             return
         }
 
         Task.builder().execute(Runnable {
             Sponge.getCommandManager().process(Sponge.getServer().console, args.joinToString(" "))
-            channel.sendMessage("** Command executed **").queue()
+            channel.sendMessage("** Command executed **")
         }).submit(plugin)
 
     }
 
-    private fun canExecuteCommand(issuer: Member): Boolean {
+    private fun canExecuteCommand(server: Server, issuer: User): Boolean {
         return entities.stream().anyMatch { e ->
             return@anyMatch when (e.type) {
-                Entity.EntityType.USER -> issuer.idLong == e.id
-                Entity.EntityType.ROLE -> issuer.roles.stream().anyMatch { r -> r.idLong == e.id }
+                Entity.EntityType.USER -> issuer.id == e.id
+                Entity.EntityType.ROLE -> issuer.getRoles(server).stream().anyMatch { r -> r.id == e.id }
             }
         }
     }

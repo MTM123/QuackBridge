@@ -1,8 +1,8 @@
 package lv.mtm123.quackbridge.commands
 
-import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.entities.TextChannel
+import org.javacord.api.entity.channel.TextChannel
+import org.javacord.api.entity.message.Message
+import org.javacord.api.entity.user.User
 
 class CommandManager(private val prefix: String) {
 
@@ -12,8 +12,8 @@ class CommandManager(private val prefix: String) {
         commands[name] = command
     }
 
-    fun handleCommand(issuer: Member, channel: TextChannel, message: Message) {
-        val commandComponents = message.contentRaw.split(" ")
+    fun handleCommand(issuer: User, channel: TextChannel, message: Message) {
+        val commandComponents = message.readableContent.split(" ")
         val cmdLabel = commandComponents[0].substring(1)
         if (!commands.containsKey(cmdLabel)) {
             return

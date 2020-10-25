@@ -11,21 +11,23 @@ sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 shadowJar {
-    minimize()
+    //minimize()
     relocate 'okhttp3', 'lv.mtm123.quackbridge.okhttp3'
     relocate 'org.jetbrains.kotlin', 'lv.mtm123.quackbridge.org.jetbrains.kotlin'
-    relocate 'net.dv8tion', 'lv.mtm123.quackbridge.net.dv8tion'
-    relocate 'com.fasterxml.jackson', 'lv.mtm123.quackbridge.com.fasterxml.jackson'
     relocate 'kotlin', 'lv.mtm123.quackbridge.kotlin'
-    relocate 'org.apache.commons.collections4', 'lv.mtm123.quackbridge.org.apache.commons.collections4'
-    relocate 'com.neovisionaries', 'lv.mtm123.quackbridge.com.neovisionaries'
-    relocate 'gnu.trove', 'lv.mtm123.quackbridge.gnu.trove'
+    relocate 'org.javacord', 'lv.mtm123.quackbridge.org.javacord'
+    relocate 'org.bouncycastle', 'lv.mtm123.quackbridge.org.bouncycastle'
     relocate 'okio', 'lv.mtm123.quackbridge.okio'
-    relocate 'com.iwebpp', 'lv.mtm123.quackbridge.com.iwebpp'
-    exclude 'org/slf4j/**'
-    exclude 'javax/annotation/**'
+    relocate 'com.codahale', 'lv.mtm123.quackbridge.com.codahale'
+    relocate 'com.fasterxml', 'lv.mtm123.quackbridge.com.fasterxml'
+    relocate 'com.neovisionaries', 'lv.mtm123.quackbridge.com.neovisionaries'
+    relocate 'io.vavr', 'lv.mtmt123.quackbridge.io.vavr'
+    relocate 'org.apache', 'lv.mtm123.quackbridge.org.apache'
+    relocate 'org.intellij', 'lv.mtm123.quackbridge.org.intellij'
     exclude 'org/jetbrains/**'
     exclude '**/module-info.class'
+    exclude 'META-INF/versions/**'
+    mergeServiceFiles()
 }
 build.dependsOn shadowJar
 
@@ -33,10 +35,8 @@ dependencies {
     compileOnly 'org.spongepowered:spongeapi:7.3.0'
     annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation("net.dv8tion:JDA:4.2.0_209") {
-        exclude module: 'opus-java'
-    }
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
+    implementation 'org.javacord:javacord:3.1.1'
 }
 
 sponge.plugin.id = 'quackbridge'

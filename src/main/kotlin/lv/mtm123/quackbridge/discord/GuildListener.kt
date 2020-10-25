@@ -3,37 +3,38 @@ package lv.mtm123.quackbridge.discord
 import lv.mtm123.quackbridge.QuackBridge
 import lv.mtm123.quackbridge.commands.CommandManager
 import lv.mtm123.quackbridge.config.Config
-import net.dv8tion.jda.api.events.ReadyEvent
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
-import net.dv8tion.jda.api.hooks.ListenerAdapter
+import org.javacord.api.event.message.MessageCreateEvent
+import org.javacord.api.listener.message.MessageCreateListener
 import org.spongepowered.api.Server
 import org.spongepowered.api.scheduler.Task
 import org.spongepowered.api.text.serializer.TextSerializers
 
-class GuildListener(private val plugin: QuackBridge, private val server: Server?, private val config: Config, private val commandManager: CommandManager) : ListenerAdapter() {
+class GuildListener(private val plugin: QuackBridge, private val server: Server?, private val config: Config, private val commandManager: CommandManager) : MessageCreateListener {
 
-    override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
-        if (event.channel.idLong != this.config.chatChannel
-                || event.isWebhookMessage
-                || event.jda.selfUser.idLong == event.author.idLong) {
+    override fun onMessageCreate(event: MessageCreateEvent) {
+        if (event.channel.id != this.config.chatChannel
+                || !event.messageAuthor.isRegularUser
+                || !event.messageAuthor.isUser
+                || !event.isServerMessage) {
             return
         }
 
-        val msg = event.message.contentStripped
+        if (!event.messageAuthor.asUser().isPresent) {
+            return
+        }
+
+        val user = event.messageAuthor.asUser().get()
+        val msg = event.message.readableContent
         if (commandManager.isPossibleCommand(msg)) {
-            event.member?.let { commandManager.handleCommand(it, event.channel, event.message) }
+            commandManager.handleCommand(user, event.channel, event.message)
         } else {
             Task.builder().execute(Runnable {
                 val bridgedMsg = this.config.discordChatMessageFormat
-                        .replace("%user%", event.member!!.effectiveName) //Won't be null because we are ignoring webhook messages
+                        .replace("%user%", user.getDisplayName(event.server.get())) //Won't be null because we are ignoring webhook messages
                         .replace("%text%", msg)
                 server?.broadcastChannel?.send(TextSerializers.FORMATTING_CODE.deserialize(bridgedMsg))
             }).submit(plugin)
         }
-    }
-
-    override fun onReady(event: ReadyEvent) {
-        event.jda.getTextChannelById(config.chatChannel)?.sendMessage("** Server started **")?.queue()
     }
 
 }

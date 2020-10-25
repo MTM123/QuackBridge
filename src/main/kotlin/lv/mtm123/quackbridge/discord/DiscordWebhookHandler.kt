@@ -3,6 +3,7 @@ package lv.mtm123.quackbridge.discord
 import com.google.gson.Gson
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.Logger
 import java.io.IOException
 
@@ -14,7 +15,7 @@ class DiscordWebhookHandler(private val logger: Logger?, private val webhookUrl:
 
     fun postMessage(messageRequest: MessageRequest) {
         val json = gson.toJson(messageRequest)
-        val requestBody = RequestBody.create(mediaType, json)
+        val requestBody = json.toRequestBody(mediaType)
 
         val req = Request.Builder()
                 .url(webhookUrl)

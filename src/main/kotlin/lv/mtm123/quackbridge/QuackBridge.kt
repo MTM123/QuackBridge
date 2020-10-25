@@ -10,12 +10,12 @@ import lv.mtm123.quackbridge.config.Entity
 import lv.mtm123.quackbridge.config.EntitySerializer
 import lv.mtm123.quackbridge.discord.DiscordWebhookHandler
 import lv.mtm123.quackbridge.discord.GuildListener
-import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.JDABuilder
 import ninja.leaping.configurate.ConfigurationOptions
 import ninja.leaping.configurate.commented.CommentedConfigurationNode
 import ninja.leaping.configurate.loader.ConfigurationLoader
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection
+import org.javacord.api.DiscordApi
+import org.javacord.api.DiscordApiBuilder
 import org.slf4j.Logger
 import org.spongepowered.api.Game
 import org.spongepowered.api.Sponge
@@ -24,6 +24,7 @@ import org.spongepowered.api.event.Listener
 import org.spongepowered.api.event.game.state.GameStartedServerEvent
 import org.spongepowered.api.event.game.state.GameStoppedServerEvent
 import org.spongepowered.api.plugin.Plugin
+import org.spongepowered.api.scheduler.Task
 import java.io.File
 import java.io.IOException
 
@@ -45,7 +46,7 @@ class QuackBridge {
     private val game: Game? = null
 
     private lateinit var config: Config
-    private lateinit var jda: JDA
+    private lateinit var discordApi: DiscordApi
 
     @Listener
     fun onServerStart(event: GameStartedServerEvent?) {
@@ -76,20 +77,28 @@ class QuackBridge {
         commandManager.register("online", CommandOnline(this, game))
         commandManager.register("cmd", CommandCmd(this, config.entitiesAllowedToExecuteCmds))
 
-        this.jda = JDABuilder.createDefault(config.botToken)
-                .addEventListeners(GuildListener(this, game?.server, this.config, commandManager))
-                .build()
-
-        val discordWebhookHandler = DiscordWebhookHandler(logger, config.discordWebhookUrl)
-
-        Sponge.getEventManager().registerListeners(this, Listener(jda, discordWebhookHandler, config))
+        val server = game?.server
+        DiscordApiBuilder().setToken(this.config.botToken).login().thenAcceptAsync { api ->
+            this.discordApi = api
+            api.addListener(GuildListener(this, server, config, commandManager))
+            api.getChannelById(this.config.chatChannel).ifPresent { ch ->
+                ch.asTextChannel().ifPresent { txch -> txch.sendMessage("**Server started**") }
+            }
+            Task.builder().execute(Runnable {
+                val discordWebhookHandler = DiscordWebhookHandler(logger, config.discordWebhookUrl)
+                Sponge.getEventManager().registerListeners(this, Listener(this.discordApi, discordWebhookHandler, config))
+            }).submit(this)
+        }
     }
 
     @Listener
     fun onServerStop(event: GameStoppedServerEvent) {
-        this.jda.getTextChannelById(config.chatChannel)?.sendMessage("** Server stopped **")?.queue()
+        this.discordApi.let { api ->
+            api.getChannelById(this.config.chatChannel).ifPresent { ch ->
+                ch.asTextChannel().ifPresent { txch -> txch.sendMessage("**Server stopped**") }
+            }
+        }
     }
 
 }
-
 
