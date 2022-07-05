@@ -27,7 +27,7 @@ import org.spongepowered.api.plugin.Plugin
 import java.io.File
 import java.io.IOException
 
-@Plugin(id = "quackbridge", name = "QuackBridge", description = "Bridges discord chat and minecraft chat", url = "https://mtm123.lv", authors = ["MTM123"])
+@Plugin(id = "quackbridge")
 class QuackBridge {
 
     @Inject
@@ -77,8 +77,8 @@ class QuackBridge {
         commandManager.register("cmd", CommandCmd(this, config.entitiesAllowedToExecuteCmds))
 
         this.jda = JDABuilder.createDefault(config.botToken)
-                .addEventListeners(GuildListener(this, game?.server, this.config, commandManager))
-                .build()
+            .addEventListeners(GuildListener(this, game?.server, this.config, commandManager))
+            .build()
 
         val discordWebhookHandler = DiscordWebhookHandler(logger, config.discordWebhookUrl)
 
