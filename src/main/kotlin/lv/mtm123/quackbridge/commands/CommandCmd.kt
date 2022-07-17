@@ -1,6 +1,7 @@
 package lv.mtm123.quackbridge.commands
 
 import lv.mtm123.quackbridge.QuackBridge
+import lv.mtm123.quackbridge.WrappedConsoleSource
 import lv.mtm123.quackbridge.config.Entity
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Message
@@ -9,6 +10,10 @@ import org.spongepowered.api.Sponge
 import org.spongepowered.api.scheduler.Task
 
 class CommandCmd(private val plugin: QuackBridge, private val entities: List<Entity>) : Command {
+
+    private val wrappedSource by lazy {
+        WrappedConsoleSource(Sponge.getServer().console)
+    }
 
     override fun onExecute(channel: TextChannel, issuer: Member, message: Message, args: List<String>) {
 
@@ -23,8 +28,11 @@ class CommandCmd(private val plugin: QuackBridge, private val entities: List<Ent
         }
 
         Task.builder().execute(Runnable {
-            Sponge.getCommandManager().process(Sponge.getServer().console, args.joinToString(" "))
-            channel.sendMessage("** Command executed **").queue()
+            Sponge.getCommandManager().process(wrappedSource, args.joinToString(" "))
+            val msg = wrappedSource.collectMessages()
+            channel.sendMessage(msg.ifEmpty {
+                "** Command executed **"
+            }).queue()
         }).submit(plugin)
 
     }
