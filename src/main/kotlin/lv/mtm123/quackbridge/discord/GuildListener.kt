@@ -35,21 +35,16 @@ class GuildListener(
 
         if (commandManager.isPossibleCommand(msg)) {
             event.member?.let { commandManager.handleCommand(it, event.channel.asTextChannel(), event.message) }
-        } else {
-            //Won't be null because we are ignoring webhook messages
-            val user = event.member!!.effectiveName
+            return
+        }
 
-            if (event.message.type == MessageType.INLINE_REPLY) {
-                val ref = event.message.messageReference ?: return
-                ref.resolve().queue({
-                    sendSyncMessage(
-                        config.replyFormat
-                            .replace("%user%", user)
-                            .replace("%target%", it.member!!.effectiveName)
-                            .replace("%text%", msg)
-                            .replace("%prefix%", config.messagePrefix)
-                    )
-                }, {
+        //Won't be null because we are ignoring webhook messages
+        val user = event.member!!.effectiveName
+
+        if (event.message.type == MessageType.INLINE_REPLY) {
+            val ref = event.message.messageReference ?: return
+            ref.resolve().mapToResult().queue { res ->
+                if (res.isFailure) {
                     sendSyncMessage(
                         config.discordChatMessageFormat
                             .replace("%user%", user)
@@ -57,15 +52,32 @@ class GuildListener(
                             .replace("%text%", msg)
                             .replace("%prefix%", config.messagePrefix)
                     )
-                })
-            } else {
-                sendSyncMessage(
-                    config.discordChatMessageFormat.replace("%text%", msg)
-                        .replace("%user%", user)
-                        .replace("%prefix%", config.messagePrefix)
-                )
+                } else {
+                    event.guild.retrieveMemberById(res.get().author.idLong).mapToResult().queue {
+                        val name = if (it.isFailure) {
+                            res.get().author.name
+                        } else {
+                            it.get().effectiveName
+                        }
+
+                        sendSyncMessage(
+                            config.replyFormat
+                                .replace("%user%", user)
+                                .replace("%target%", name)
+                                .replace("%text%", msg)
+                                .replace("%prefix%", config.messagePrefix)
+                        )
+                    }
+
+                }
             }
 
+        } else {
+            sendSyncMessage(
+                config.discordChatMessageFormat.replace("%text%", msg)
+                    .replace("%user%", user)
+                    .replace("%prefix%", config.messagePrefix)
+            )
         }
     }
 
