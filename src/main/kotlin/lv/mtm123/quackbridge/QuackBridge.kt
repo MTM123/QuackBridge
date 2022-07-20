@@ -32,7 +32,7 @@ import java.io.IOException
 class QuackBridge {
 
     @Inject
-    private val logger: Logger? = null
+    private lateinit var logger: Logger
 
     @Inject
     @DefaultConfig(sharedRoot = false)
@@ -43,7 +43,7 @@ class QuackBridge {
     private lateinit var defaultConfigFile: File
 
     @Inject
-    private val game: Game? = null
+    private lateinit var game: Game
 
     private lateinit var config: Config
     private lateinit var jda: JDA
@@ -61,7 +61,7 @@ class QuackBridge {
             try {
                 this.configManager.save(this.configManager.createEmptyNode(options).setValue(typeToken, default))
             } catch (e: IOException) {
-                this.logger?.error("Failed to save the config", e)
+                this.logger.error("Failed to save the config", e)
                 return
             }
         }
@@ -69,7 +69,7 @@ class QuackBridge {
         try {
             this.config = this.configManager.load(options).getValue(typeToken, default)
         } catch (e: Exception) {
-            this.logger?.error("Failed to load the config - using default", e)
+            this.logger.error("Failed to load the config - using default", e)
             return
         }
 
@@ -79,7 +79,7 @@ class QuackBridge {
 
         this.jda = JDABuilder.createDefault(config.botToken)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
-            .addEventListeners(GuildListener(this, game?.server, this.config, commandManager))
+            .addEventListeners(GuildListener(this, game.server, this.config, commandManager))
             .build()
 
         val discordWebhookHandler = DiscordWebhookHandler(logger, config.discordWebhookUrl)
