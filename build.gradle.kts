@@ -64,7 +64,7 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
     )
     val targetPackage = "lv.mtm123.quackbridge"
 
-    //minimize()
+    minimize()
 
     relocations.forEach {
         relocate(it, "$targetPackage.$it")
