@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation("net.dv8tion:JDA:4.2.0_209") {
+    implementation("net.dv8tion:JDA:5.0.0-alpha.15") {
         exclude(module = "opus-java")
     }
     implementation("com.squareup.okhttp3:okhttp:4.10.0")

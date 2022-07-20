@@ -6,8 +6,9 @@ import lv.mtm123.quackbridge.config.Config
 import net.dv8tion.jda.api.entities.EmbedType
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageEmbed
+import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.events.ReadyEvent
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.spongepowered.api.Server
 import org.spongepowered.api.scheduler.Task
@@ -20,7 +21,9 @@ class GuildListener(
     private val commandManager: CommandManager
 ) : ListenerAdapter() {
 
-    override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
+    override fun onMessageReceived(event: MessageReceivedEvent) {
+        if (!event.isFromGuild) return
+
         if (event.channel.idLong != this.config.chatChannel
             || event.isWebhookMessage
             || event.jda.selfUser.idLong == event.author.idLong
@@ -31,15 +34,38 @@ class GuildListener(
         val msg = createMessage(event.message)
 
         if (commandManager.isPossibleCommand(msg)) {
-            event.member?.let { commandManager.handleCommand(it, event.channel, event.message) }
+            event.member?.let { commandManager.handleCommand(it, event.channel.asTextChannel(), event.message) }
         } else {
-            Task.builder().execute(Runnable {
-                val bridgedMsg = this.config.discordChatMessageFormat.replace(
-                    "%user%", event.member!!.effectiveName
-                ) //Won't be null because we are ignoring webhook messages
-                    .replace("%text%", msg)
-                server?.broadcastChannel?.send(TextSerializers.FORMATTING_CODE.deserialize(bridgedMsg))
-            }).submit(plugin)
+            //Won't be null because we are ignoring webhook messages
+            val user = event.member!!.effectiveName
+
+            if (event.message.type == MessageType.INLINE_REPLY) {
+                val ref = event.message.messageReference ?: return
+                ref.resolve().queue({
+                    sendSyncMessage(
+                        config.replyFormat
+                            .replace("%user%", user)
+                            .replace("%target%", it.member!!.effectiveName)
+                            .replace("%text%", msg)
+                            .replace("%prefix%", config.messagePrefix)
+                    )
+                }, {
+                    sendSyncMessage(
+                        config.discordChatMessageFormat
+                            .replace("%user%", user)
+                            .replace("%target%", "unknown")
+                            .replace("%text%", msg)
+                            .replace("%prefix%", config.messagePrefix)
+                    )
+                })
+            } else {
+                sendSyncMessage(
+                    config.discordChatMessageFormat.replace("%text%", msg)
+                        .replace("%user%", user)
+                        .replace("%prefix%", config.messagePrefix)
+                )
+            }
+
         }
     }
 
@@ -88,4 +114,10 @@ class GuildListener(
         return newMessage
     }
 
+    private fun sendSyncMessage(msg: String) {
+        Task.builder().execute(Runnable {
+            val channel = server?.broadcastChannel ?: return@Runnable
+            channel.send(TextSerializers.FORMATTING_CODE.deserialize(msg))
+        }).submit(plugin)
+    }
 }

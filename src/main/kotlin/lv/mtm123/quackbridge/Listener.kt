@@ -32,7 +32,7 @@ class Listener(private val jda: JDA, private val webhookHandler: DiscordWebhookH
             embed.setDescription(di.description.toPlain())
         }
 
-        jda.getTextChannelById(config.chatChannel)?.sendMessage(embed.build())?.queue()
+        jda.getTextChannelById(config.chatChannel)?.sendMessageEmbeds(embed.build())?.queue()
     }
 
     @Listener(order = Order.POST)

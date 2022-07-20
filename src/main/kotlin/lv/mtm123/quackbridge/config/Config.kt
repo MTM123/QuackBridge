@@ -21,8 +21,14 @@ class Config {
     @Setting("discord-webhook-url")
     val discordWebhookUrl: String =  "https://example.com"
 
+    @Setting("discord-message-prefix")
+    val messagePrefix = "&6[Discord]"
+
     @Setting("discord-chat-message-format")
-    val discordChatMessageFormat: String = "&6[Discord] &a%user%: &7%text%"
+    val discordChatMessageFormat: String = "%prefix% &a%user%: &7%text%"
+
+    @Setting("discord-reply-format")
+    val replyFormat = "%prefix% &a%user% &7replied to %target%: %text%"
 
     @Setting("entities-allowed-to-execute-cmds")
     val entitiesAllowedToExecuteCmds: List<Entity> = listOf(Entity(Entity.EntityType.ROLE, 751497992149663856),

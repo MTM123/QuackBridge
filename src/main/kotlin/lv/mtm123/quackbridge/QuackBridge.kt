@@ -12,6 +12,7 @@ import lv.mtm123.quackbridge.discord.DiscordWebhookHandler
 import lv.mtm123.quackbridge.discord.GuildListener
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.requests.GatewayIntent
 import ninja.leaping.configurate.ConfigurationOptions
 import ninja.leaping.configurate.commented.CommentedConfigurationNode
 import ninja.leaping.configurate.loader.ConfigurationLoader
@@ -77,6 +78,7 @@ class QuackBridge {
         commandManager.register("cmd", CommandCmd(this, config.entitiesAllowedToExecuteCmds))
 
         this.jda = JDABuilder.createDefault(config.botToken)
+            .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
             .addEventListeners(GuildListener(this, game?.server, this.config, commandManager))
             .build()
 
