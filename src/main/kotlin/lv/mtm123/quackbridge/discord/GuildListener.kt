@@ -10,16 +10,18 @@ import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import org.spongepowered.api.Server
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.spongepowered.api.scheduler.Task
-import org.spongepowered.api.text.serializer.TextSerializers
 
 class GuildListener(
     private val plugin: QuackBridge,
-    private val server: Server?,
     private val config: Config,
     private val commandManager: CommandManager
 ) : ListenerAdapter() {
+
+    private val legacySerializer by lazy {
+        LegacyComponentSerializer.builder().extractUrls().character('&').build()
+    }
 
     override fun onMessageReceived(event: MessageReceivedEvent) {
         if (!event.isFromGuild) return
@@ -118,7 +120,7 @@ class GuildListener(
 
     private fun concat(msg: String, text: String): String {
         var newMessage = msg
-        if (msg.isEmpty()) {
+        if (msg.isNotEmpty()) {
             newMessage += "\n"
         }
 
@@ -128,8 +130,7 @@ class GuildListener(
 
     private fun sendSyncMessage(msg: String) {
         Task.builder().execute(Runnable {
-            val channel = server?.broadcastChannel ?: return@Runnable
-            channel.send(TextSerializers.FORMATTING_CODE.deserialize(msg))
+            plugin.adventure.all().sendMessage(legacySerializer.deserialize(msg))
         }).submit(plugin)
     }
 }

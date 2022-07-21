@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "lv.mtm123"
-version = "1.1.0-SNAPSHOT"
+version = "1.1.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -19,6 +19,8 @@ dependencies {
         exclude(module = "opus-java")
     }
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("net.kyori:adventure-platform-spongeapi:4.1.1")
+    implementation("net.kyori:adventure-text-serializer-legacy:4.11.0")
 }
 
 sponge {
@@ -61,6 +63,7 @@ val shadowJar by tasks.getting(com.github.jengelman.gradle.plugins.shadow.tasks.
         "gnu.trove",
         "okio",
         "com.iwebpp",
+        "net.kyori"
     )
     val targetPackage = "lv.mtm123.quackbridge"
 

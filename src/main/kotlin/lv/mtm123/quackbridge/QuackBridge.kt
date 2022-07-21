@@ -13,6 +13,7 @@ import lv.mtm123.quackbridge.discord.GuildListener
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.requests.GatewayIntent
+import net.kyori.adventure.platform.spongeapi.SpongeAudiences
 import ninja.leaping.configurate.ConfigurationOptions
 import ninja.leaping.configurate.commented.CommentedConfigurationNode
 import ninja.leaping.configurate.loader.ConfigurationLoader
@@ -44,6 +45,9 @@ class QuackBridge {
 
     @Inject
     private lateinit var game: Game
+
+    @Inject
+    internal lateinit var adventure: SpongeAudiences
 
     private lateinit var config: Config
     private lateinit var jda: JDA
@@ -79,7 +83,7 @@ class QuackBridge {
 
         this.jda = JDABuilder.createDefault(config.botToken)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS)
-            .addEventListeners(GuildListener(this, game.server, this.config, commandManager))
+            .addEventListeners(GuildListener(this, this.config, commandManager))
             .build()
 
         val discordWebhookHandler = DiscordWebhookHandler(logger, config.discordWebhookUrl)
