@@ -17,4 +17,8 @@ class WrappedConsoleSource(val source: ConsoleSource) : ConsoleSource by source 
         return msg
     }
 
+    override fun hasPermission(permission: String): Boolean {
+        return true
+    }
+
 }
