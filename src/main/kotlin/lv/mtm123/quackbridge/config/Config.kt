@@ -30,6 +30,9 @@ class Config {
     @Setting("discord-reply-format")
     val replyFormat = "%prefix% &a%user% &7replied to %target%: %text%"
 
+    @Setting("discord-reply-hover-format")
+    val replyHoverFormat = "&a%target% &7said: &7%text%"
+
     @Setting("entities-allowed-to-execute-cmds")
     val entitiesAllowedToExecuteCmds: List<Entity> = listOf(Entity(Entity.EntityType.ROLE, 751497992149663856),
             Entity(Entity.EntityType.USER, 179983857267769344))

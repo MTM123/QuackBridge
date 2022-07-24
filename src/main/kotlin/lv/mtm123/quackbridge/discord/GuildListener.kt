@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.spongepowered.api.scheduler.Task
 
@@ -48,11 +49,13 @@ class GuildListener(
             ref.resolve().mapToResult().queue { res ->
                 if (res.isFailure) {
                     sendSyncMessage(
-                        config.discordChatMessageFormat
+                        config.replyFormat
                             .replace("%user%", user)
                             .replace("%target%", "unknown")
                             .replace("%text%", msg)
-                            .replace("%prefix%", config.messagePrefix)
+                            .replace("%prefix%", config.messagePrefix),
+                        config.replyHoverFormat.replace("%text%", "<Reply not available>")
+                            .replace("%target%", "unknown")
                     )
                 } else {
                     event.guild.retrieveMemberById(res.get().author.idLong).mapToResult().queue {
@@ -67,7 +70,9 @@ class GuildListener(
                                 .replace("%user%", user)
                                 .replace("%target%", name)
                                 .replace("%text%", msg)
-                                .replace("%prefix%", config.messagePrefix)
+                                .replace("%prefix%", config.messagePrefix),
+                            config.replyHoverFormat.replace("%text%", createMessage(res.get()))
+                                .replace("%target%", name)
                         )
                     }
 
@@ -102,7 +107,7 @@ class GuildListener(
     }
 
     private fun createMessage(message: Message): String {
-        var msg = message.contentStripped
+        var msg = message.contentDisplay
         if (message.embeds.isNotEmpty()) {
             message.embeds.forEach {
                 msg = concat(msg, asUrl(it))
@@ -120,7 +125,7 @@ class GuildListener(
 
     private fun concat(msg: String, text: String): String {
         var newMessage = msg
-        if (msg.isNotEmpty()) {
+        if (msg.isNotEmpty() && text.isNotEmpty()) {
             newMessage += "\n"
         }
 
@@ -128,9 +133,13 @@ class GuildListener(
         return newMessage
     }
 
-    private fun sendSyncMessage(msg: String) {
+    private fun sendSyncMessage(msg: String, reply: String? = null) {
         Task.builder().execute(Runnable {
-            plugin.adventure.all().sendMessage(legacySerializer.deserialize(msg))
+            var text = legacySerializer.deserialize(msg)
+            reply?.let {
+                text = text.hoverEvent(HoverEvent.showText(legacySerializer.deserialize(it)))
+            }
+            plugin.adventure.all().sendMessage(text)
         }).submit(plugin)
     }
 }
