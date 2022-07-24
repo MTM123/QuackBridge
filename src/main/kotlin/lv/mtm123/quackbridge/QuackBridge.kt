@@ -93,6 +93,7 @@ class QuackBridge {
 
     @Listener
     fun onServerStop(event: GameStoppedServerEvent) {
+        if(!::jda.isInitialized) return
         this.jda.getTextChannelById(config.chatChannel)?.sendMessage("** Server stopped **")?.queue()
     }
 
